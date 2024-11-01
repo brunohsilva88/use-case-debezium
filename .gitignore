@@ -1,5 +1,6 @@
-/bin
-/data
-/include
-/lib
-*.cfg
+/debezium-case/bin
+/debezium-case/data
+/debezium-case/include
+/debezium-case/lib
+/debezium-case/*.cfg
+/debezium-case/lib64
