@@ -1,0 +1,21 @@
+{
+    "name": "source-payment-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+      	"database.hostname": "postgres",
+        "database.port": "5432",
+        "database.user": "admin",
+      	"database.password": "admin",
+        "database.dbname": "dvdrental",
+        "plugin.name": "pgoutput",
+        "database.server.name": "source",
+        "key.converter.schemas.enable": "false",
+        "value.converter.schemas.enable": "false",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+	      "table.include.list": "public.payment_streaming",
+        "slot.name" : "dbz_payment_transaction_slot"
+    }
+}

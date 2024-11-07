@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=userdb
+      - POSTGRES_DB=dvdrental
     networks:
       - server-db-networks
     volumes:
@@ -28,12 +28,13 @@ services:
     image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - server-db-networks
 
   kafka:
     image: confluentinc/cp-enterprise-kafka:latest
     depends_on:
       - zookeeper
-
     ports:
       - 29092:29092
     environment:
@@ -42,10 +43,11 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-
+    networks:
+      - server-db-networks
 
   debezium:
-    image: debezium/connect:3.0.0.Final
+    image: debezium/connect:1.4
     environment:
       BOOTSTRAP_SERVERS: kafka:9092
       GROUP_ID: 1
@@ -58,9 +60,11 @@ services:
     depends_on: [kafka]
     ports:
       - 8083:8083
+    networks:
+      - server-db-networks
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:latest
+    image: confluentinc/cp-schema-registry:5.5.3
     environment:
       - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
       - SCHEMA_REGISTRY_HOST_NAME=schema-registry
@@ -68,6 +72,8 @@ services:
     ports:
       - 8081:8081
     depends_on: [zookeeper, kafka]
+    networks:
+      - server-db-networks
   
   kafka_manager:
     image: hlebalbau/kafka-manager:stable
@@ -81,9 +87,15 @@ services:
       ZK_HOSTS: "zookeeper:2181"
       APPLICATION_SECRET: "random-secret"
     command: -Dpidfile.path=/dev/null 
+    networks:
+      - server-db-networks
 
-
-
+  jupyter-notebook:
+    image: pyspark-notebook-custom:v1
+    ports:
+      - 8888:8888
+    networks:
+      - server-db-networks
 
 networks:
   server-db-networks:
